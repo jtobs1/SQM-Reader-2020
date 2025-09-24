@@ -2,11 +2,18 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from ARS_reader import ARS_reader
+import sys
 
 """
 This code will create basic plots of ARS data from 2020
 hopefully it can be automated for the current (2025) data?
 """
+
+def monthly_average(dataframe):
+    # Creates a dataframe with one row/month and the monthly averages of AQI.
+    dataframe["Monthly Average"] = dataframe.groupby(dataframe["Date"].dt.to_period("M"))["AQI"].transform("mean")
+    dataframe["Monthly Standard Deviation"] = dataframe.groupby(dataframe["Date"].dt.to_period("M"))["AQI"].transform('std')
+    # return dataframe
 
 f_ben = '/Users/jacksontobin/Local_Documents/NightTime_Research/SQM/ARS_2020/BEN 2020 PM25.csv'
 f_sop = '/Users/jacksontobin/Local_Documents/NightTime_Research/SQM/ARS_2020/SOP 2020 PM25.csv'
@@ -15,15 +22,16 @@ f_dis = '/Users/jacksontobin/Local_Documents/NightTime_Research/SQM/ARS_2020/DIS
 
 ben_obj = ARS_reader(f_ben)
 ben_df = ben_obj.dataframe
-fos_df = ARS_reader(f_fos).dataframe
-sop_df = ARS_reader(f_sop).dataframe
-dis_df = ARS_reader(f_dis).dataframe
+monthly_average(ben_df)
+print(ben_df["Monthly Average"])
+print(ben_df["Monthly Standard Deviation"])
+
+plt.scatter(ben_df['Date'], ben_df["Monthly Average"])
+plt.show()
+plt.close()
 
 fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(15, 8))
-ax.scatter(ben_df["Date"], ben_df["AQI"], marker=',', s=2, c='b')
-ax.scatter(fos_df['Date'], fos_df["AQI"], marker=',', s=2, c='r')
-ax.scatter(sop_df['Date'], sop_df["AQI"], marker=',', s=2, c='g')
-ax.scatter(dis_df['Date'], dis_df["AQI"], marker=',', s=2)
+ax.scatter(ben_df["Date"], (ben_df["AQI"]), marker=',', s=2, c='b')
 ax.set_xlabel("Date")
 ax.set_ylabel("AQI PM2.5")
 ax.set_title("Hourly PM2.5 AQI: Bench at Spring Creek Trail")
