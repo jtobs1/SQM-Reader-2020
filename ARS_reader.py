@@ -1,8 +1,5 @@
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib
-import sys
 import datetime
 
 """
@@ -22,25 +19,25 @@ Dataframe structure:
 """
 
 def date_rename(date):
-    '''Turns date strings into datetime objects.'''
-    return datetime.datetime.strptime(date, r'%m/%d/%Y %H:%M')
+        '''Turns date strings into datetime objects.'''
+        return datetime.datetime.strptime(date, r'%m/%d/%Y %H:%M')
 
-f_ben = '/Users/jacksontobin/Local_Documents/NightTime_Research/SQM/ARS_2020/BEN 2020 PM25.csv'
-f_sop = '/Users/jacksontobin/Local_Documents/NightTime_Research/SQM/ARS_2020/SOP 2020 PM25.csv'
-f_fos = '/Users/jacksontobin/Local_Documents/NightTime_Research/SQM/ARS_2020/FOS 2020 PM25.csv'
-f_dis = '/Users/jacksontobin/Local_Documents/NightTime_Research/SQM/ARS_2020/DIS 2020 PM25.csv'
+class ARS_reader(object):    
+    def __init__(self, path):
+        df = pd.read_csv(path)
+        
+        # Add titles to the columns
+        df.columns = ["Location", "Date", "Particulate", "AQI"]
+        # Reset the date/times to a DateTime object
+        df["Date"] = df["Date"].apply(date_rename)
+        # Remove AQI less than 0 (not possible)
+        df['AQI'] = df['AQI'].apply(lambda x: np.nan if (x < 0) else x)
 
-data_ben = pd.read_csv(f_ben)
-
-# Rename the Columns
-data_ben.rename(columns={'45.96':'AQI', '731':'Location', '1/1/2020 0:00':'Date'}, inplace=True)
-data_ben['Date'] = data_ben['Date'].apply(date_rename)
-data_ben['AQI'] = data_ben['AQI'].apply(lambda x: np.nan if (x < 0) else x)
-
-# Plot the data
-fig, ax = plt.subplots()
-plt.scatter(data_ben['Date'], data_ben['AQI'], s=1)
-plt.xlabel('Date')
-plt.ylabel('AQI')
-plt.show()
-plt.close()
+        # Instantiate object variables
+        # Allow access to DataFrame: This allows for easier processing downstream
+        self.dataframe = df
+        # Allow access to ndarrays for easier, short-term access
+        self.date = df["Date"]
+        self.location = df["Location"]
+        self.aqi = df["AQI"]
+        self.particulate = df["Particulate"]
